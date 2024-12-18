@@ -41,8 +41,25 @@ model messages {
 
   trigger         String?
 
+  enterprise      enterprises @relation(fields: [enterpriseId], references: [id])
+  enterpriseId    String
+
   parentMessage   messages? @relation("ParentMessage", fields: [parentMessageId], references: [id])
   parentMessageId String?
 
   childMessages   messages[] @relation("ParentMessage")
+}
+
+model enterprises {
+  id         String    @id @default(dbgenerated("gen_random_uuid()"))
+  deletedAt  DateTime? @default("9999-12-12T00:00:00.000Z")
+  createdAt  DateTime? @default(now())
+  updatedAt  DateTime? @updatedAt
+  available  Boolean @default(true)
+
+  name            String
+  phone           String
+  connected       Boolean
+
+  Message         messages[]
 }

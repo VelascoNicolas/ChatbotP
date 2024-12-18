@@ -9,10 +9,8 @@ export class BotService implements OnModuleInit {
   private client: Client = new Client({
     authStrategy: new LocalAuth(),
   });
-
+  private enterpriseId: string = '';
   private prisma = new PrismaClient();
-
-  private readonly enterpriseId = '31f3dd7a-adf1-475c-96b0-4ad02f5378a6';
 
   private readonly logger = new Logger(BotService.name);
 
@@ -35,7 +33,7 @@ export class BotService implements OnModuleInit {
 
     this.client.on('message', async (msg) => {
       this.logger.verbose(`${msg.from}: ${msg.body}`);
-      const messages = await this.prisma.messages.findMany({where: {available: true}, orderBy: {numOrder: 'asc'}});
+      const messages = await this.prisma.messages.findMany({where: {enterpriseId: this.enterpriseId}, orderBy: {numOrder: 'asc'}});
       let m;
       for(let i = numOrderCount; i <= messages.length;) {
 
@@ -86,5 +84,9 @@ export class BotService implements OnModuleInit {
     });
 
     this.client.initialize();
+  }
+
+  async setEnterpriseId(id: string) {
+    this.enterpriseId = id;
   }
 }
