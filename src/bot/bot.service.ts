@@ -2,7 +2,6 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import { PrismaClient } from '@prisma/client';
-import { repeat } from 'rxjs';
 
 @Injectable()
 export class BotService implements OnModuleInit {
