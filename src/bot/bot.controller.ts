@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Res } from '@nestjs/common';
+import { Controller, Get, Param, Post, Res } from '@nestjs/common';
 import { BotService } from './bot.service';
 import * as QRCode from 'qrcode';
 import { Response } from 'express';
@@ -24,5 +24,10 @@ export class BotController {
 
     response.setHeader('Content-Type', 'image/png');
     QRCode.toFileStream(response, this.qrCode);
+  }
+
+  @Post('disconnect')
+  async disconnect() {
+    await this.botService.disconnect();
   }
 }

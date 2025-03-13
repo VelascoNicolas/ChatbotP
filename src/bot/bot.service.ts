@@ -2,6 +2,12 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { Client, LocalAuth } from 'whatsapp-web.js';
 import { PrismaClient } from '@prisma/client';
+import * as fs from 'fs';
+import * as path from 'path';
+import { promisify } from 'util';
+
+const rm = promisify(fs.rm);
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 @Injectable()
 export class BotService implements OnModuleInit {
@@ -87,5 +93,37 @@ export class BotService implements OnModuleInit {
 
   async setEnterpriseId(id: string) {
     this.enterpriseId = id;
+  }
+
+  async disconnect() {
+    //const authPath = path.join(__dirname, '..', '..', '.wwebjs_auth');
+    const cachePath = path.join(__dirname, '..', '..', '.wwebjs_cache');
+
+    const deleteFolder = async (folderPath: string) => {
+      try {
+        if (fs.existsSync(folderPath)) {
+          await rm(folderPath, { recursive: true, force: true });
+        }
+      } catch (error) {
+        if (error.code === 'EBUSY') {
+          this.logger.warn(`Resource busy, retrying: ${folderPath}`);
+          await sleep(1000);
+          await deleteFolder(folderPath);
+        } else {
+          throw error;
+        }
+      }
+    };
+
+    try {
+      //await deleteFolder(authPath);
+      await deleteFolder(cachePath);
+      await this.client.logout();
+      this.logger.log('Client disconnected and folders deleted successfully.');
+      this.client.initialize(); // Reiniciar el cliente después de la desconexión
+      this.logger.log('Client initialized again.');
+    } catch (error) {
+      this.logger.error(`Error while cleaning up: ${error.message}`);
+    }
   }
 }
