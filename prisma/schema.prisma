@@ -39,6 +39,8 @@ model messages {
   typeMessage     TypeMessage @default(NONE)
   showName        Boolean
 
+  finishLane      Boolean     @default(false)
+
   trigger         String?
 
   enterprise      enterprises @relation(fields: [enterpriseId], references: [id])
